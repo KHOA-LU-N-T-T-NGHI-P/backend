@@ -1,0 +1,43 @@
+
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_elastic
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DATABASE: web_da
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 123456789
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_elastic:/var/lib/mysql
+
+  elasticsearch:
+    container_name: es-container
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.2
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    networks:
+      - es-net
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: kb-container
+    image: docker.elastic.co/kibana/kibana:8.15.2
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es-container:9200
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+networks:
+  es-net:
+    driver: bridge
+volumes:
+  mysql_elastic:
